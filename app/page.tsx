@@ -42,9 +42,9 @@ export default function ChatPage() {
     if (savedMessages) {
       try {
         const parsed = JSON.parse(savedMessages);
-        setMessages(parsed.map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp)
+        setMessages(parsed.map((msg: unknown) => ({
+          ...msg as Message,
+          timestamp: new Date((msg as Message).timestamp)
         })));
       } catch (error) {
         console.error('Failed to load messages from localStorage:', error);
@@ -118,7 +118,7 @@ export default function ChatPage() {
 
     setMessages(prev => [...prev, userMessage]);
     const currentInput = inputValue;
-    const currentFiles = uploadedFiles;
+    // const currentFiles = uploadedFiles;
     setInputValue("");
     setUploadedFiles([]);
     setShowFileUpload(false);
@@ -217,8 +217,8 @@ export default function ChatPage() {
         }
       }
 
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
         console.log('Request was aborted');
       } else {
         console.error('Streaming error:', error);
@@ -336,7 +336,7 @@ export default function ChatPage() {
                 메시지를 입력하고 Enter를 눌러 전송하세요
               </p>
               <Badge variant="outline" className="text-xs">
-                💡 "/"를 입력하면 프롬프트 힌트를 볼 수 있습니다
+                💡 &quot;/&quot;를 입력하면 프롬프트 힌트를 볼 수 있습니다
               </Badge>
             </CardContent>
           </Card>

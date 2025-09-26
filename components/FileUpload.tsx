@@ -5,6 +5,7 @@ import { Upload, X, File, Image, FileText, FileVideo, FileAudio } from "lucide-r
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
+import NextImage from "next/image";
 
 interface UploadedFile {
   id: string;
@@ -211,9 +212,11 @@ export default function FileUpload({
                     {/* 파일 아이콘 또는 이미지 미리보기 */}
                     <div className="flex-shrink-0">
                       {uploadedFile.preview ? (
-                        <img 
+                        <NextImage 
                           src={uploadedFile.preview} 
-                          alt={uploadedFile.file.name}
+                          alt={`${uploadedFile.file.name} 미리보기`}
+                          width={32}
+                          height={32}
                           className="w-8 h-8 object-cover rounded"
                         />
                       ) : (

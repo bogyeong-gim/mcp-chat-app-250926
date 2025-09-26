@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       connection: {
-        id: connection.client.name,
+        id: config.id,
         status: connection.status,
         lastConnected: connection.lastConnected
       }

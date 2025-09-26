@@ -24,7 +24,8 @@ const MarkdownRenderer = memo(function MarkdownRenderer({
         rehypePlugins={[rehypeHighlight]}
         components={{
           // 코드 블록 스타일링
-          code({ node, className, children, ...props }: any) {
+          code(props: React.HTMLProps<HTMLElement>) {
+            const { className, children, ...rest } = props;
             const match = /language-(\w+)/.exec(className || '');
             const inline = !match;
             const codeText = String(children).replace(/\n$/, '');
@@ -32,14 +33,14 @@ const MarkdownRenderer = memo(function MarkdownRenderer({
             return !inline && match ? (
               <div className="relative group">
                 <pre className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 overflow-x-auto pr-12">
-                  <code className={className} {...props}>
+                  <code className={className} {...rest}>
                     {children}
                   </code>
                 </pre>
                 <CopyButton text={codeText} />
               </div>
             ) : (
-              <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm" {...props}>
+              <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm" {...rest}>
                 {children}
               </code>
             );

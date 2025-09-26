@@ -16,7 +16,7 @@ export interface MCPServerConfig {
 
 export interface MCPConnection {
   client: Client;
-  transport: any;
+  transport: unknown;
   status: 'connected' | 'connecting' | 'disconnected' | 'error';
   error?: string;
   lastConnected?: Date;
@@ -66,9 +66,7 @@ class MCPServerManager {
           headers['Authorization'] = `Bearer ${config.authToken}`;
         }
         
-        transport = new StreamableHTTPClientTransport(url, {
-          headers
-        });
+        transport = new StreamableHTTPClientTransport(url);
       } else if (config.command) {
         // Stdio 기반 MCP 서버 연결
         transport = new StdioClientTransport({
@@ -183,7 +181,7 @@ class MCPServerManager {
     }
   }
 
-  async callTool(connectionId: string, toolName: string, arguments_: any) {
+  async callTool(connectionId: string, toolName: string, arguments_: unknown) {
     const connection = this.connections.get(connectionId);
     if (!connection || connection.status !== 'connected') {
       throw new Error('서버가 연결되지 않았습니다');
@@ -192,7 +190,7 @@ class MCPServerManager {
     try {
       return await connection.client.callTool({
         name: toolName,
-        arguments: arguments_
+        arguments: arguments_ as { [x: string]: unknown }
       });
     } catch (error) {
       console.error(`도구 호출 실패: ${connectionId}`, error);
@@ -214,7 +212,7 @@ class MCPServerManager {
     }
   }
 
-  async getPrompt(connectionId: string, promptName: string, arguments_: any) {
+  async getPrompt(connectionId: string, promptName: string, arguments_: unknown) {
     const connection = this.connections.get(connectionId);
     if (!connection || connection.status !== 'connected') {
       throw new Error('서버가 연결되지 않았습니다');
@@ -223,7 +221,7 @@ class MCPServerManager {
     try {
       return await connection.client.getPrompt({
         name: promptName,
-        arguments: arguments_
+        arguments: arguments_ as { [x: string]: string }
       });
     } catch (error) {
       console.error(`프롬프트 가져오기 실패: ${connectionId}`, error);

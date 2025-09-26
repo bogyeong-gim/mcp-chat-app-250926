@@ -33,20 +33,20 @@ export default function MCPServersPage() {
   const [editingServer, setEditingServer] = useState<MCPServer | null>(null);
   const [selectedServer, setSelectedServer] = useState<MCPServer | null>(null);
   const [serverDetails, setServerDetails] = useState<{
-    tools: any[];
-    resources: any[];
-    prompts: any[];
+    tools: unknown[];
+    resources: unknown[];
+    prompts: unknown[];
   }>({ tools: [], resources: [], prompts: [] });
   const [toolExecution, setToolExecution] = useState<{
     toolName: string;
     arguments: string;
-    result: any;
+    result: unknown | null;
     loading: boolean;
   }>({ toolName: '', arguments: '', result: null, loading: false });
   const [serverCapabilities, setServerCapabilities] = useState<Record<string, {
-    tools: any[];
-    resources: any[];
-    prompts: any[];
+    tools: unknown[];
+    resources: unknown[];
+    prompts: unknown[];
   }>>({});
   const [showJsonImport, setShowJsonImport] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
@@ -68,9 +68,9 @@ export default function MCPServersPage() {
     if (savedServers) {
       try {
         const parsed = JSON.parse(savedServers);
-        setServers(parsed.map((server: any) => ({
-          ...server,
-          lastConnected: server.lastConnected ? new Date(server.lastConnected) : undefined
+        setServers(parsed.map((server: unknown) => ({
+          ...server as MCPServer,
+          lastConnected: (server as MCPServer).lastConnected ? new Date((server as MCPServer).lastConnected!) : undefined
         })));
       } catch (error) {
         console.error('Failed to load MCP servers from localStorage:', error);
@@ -305,14 +305,15 @@ export default function MCPServersPage() {
 
       const newServers: MCPServer[] = [];
       
-      Object.entries(jsonData.mcpServers).forEach(([name, config]: [string, any]) => {
+      Object.entries(jsonData.mcpServers).forEach(([name, config]: [string, unknown]) => {
+        const configObj = config as { command?: string; args?: string[]; env?: Record<string, string> };
         const server: MCPServer = {
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
           name: name,
           description: `JSON에서 가져온 ${name} 서버`,
-          command: config.command,
-          args: config.args,
-          env: config.env || {},
+          command: configObj.command,
+          args: configObj.args,
+          env: configObj.env || {},
           transport: 'stdio',
           status: 'disconnected'
         };
@@ -323,13 +324,13 @@ export default function MCPServersPage() {
       setShowJsonImport(false);
       setJsonInput('');
       alert(`${newServers.length}개의 서버가 추가되었습니다.`);
-    } catch (error) {
+    } catch {
       alert('JSON 형식이 올바르지 않습니다. 다시 확인해주세요.');
     }
   };
 
   const handleExportJson = () => {
-    const mcpServers: Record<string, any> = {};
+    const mcpServers: Record<string, unknown> = {};
     
     servers.forEach(server => {
       if (server.transport === 'stdio' && server.command) {
@@ -854,9 +855,9 @@ export default function MCPServersPage() {
                         <div>
                           <p className="text-xs font-medium mb-1">사용 가능한 도구:</p>
                           <div className="flex flex-wrap gap-1">
-                            {serverCapabilities[server.id].tools.slice(0, 3).map((tool: any, index: number) => (
+                            {serverCapabilities[server.id].tools.slice(0, 3).map((tool: unknown, index: number) => (
                               <Badge key={index} variant="secondary" className="text-xs">
-                                {tool.name}
+                                {(tool as { name: string }).name}
                               </Badge>
                             ))}
                             {serverCapabilities[server.id].tools.length > 3 && (
@@ -873,9 +874,9 @@ export default function MCPServersPage() {
                         <div>
                           <p className="text-xs font-medium mb-1">사용 가능한 프롬프트:</p>
                           <div className="flex flex-wrap gap-1">
-                            {serverCapabilities[server.id].prompts.slice(0, 2).map((prompt: any, index: number) => (
+                            {serverCapabilities[server.id].prompts.slice(0, 2).map((prompt: unknown, index: number) => (
                               <Badge key={index} variant="outline" className="text-xs">
-                                {prompt.name}
+                                {(prompt as { name: string }).name}
                               </Badge>
                             ))}
                             {serverCapabilities[server.id].prompts.length > 2 && (
@@ -960,7 +961,7 @@ export default function MCPServersPage() {
             <strong>Smithery 서버 연결 문제:</strong> 현재 Smithery 서버가 Rate Limit로 인해 
             일시적으로 제한되고 있습니다. 로컬 MCP 서버를 사용하거나 잠시 후 다시 시도해주세요.
             <br />
-            <strong>해결 방법:</strong> "로컬 서버 추가" 버튼을 사용하여 로컬 파일 시스템 서버를 추가해보세요.
+            <strong>해결 방법:</strong> &quot;로컬 서버 추가&quot; 버튼을 사용하여 로컬 파일 시스템 서버를 추가해보세요.
           </AlertDescription>
         </Alert>
 
@@ -1008,7 +1009,7 @@ export default function MCPServersPage() {
                         className="font-mono text-sm"
                       />
                     </div>
-                    {toolExecution.result && (
+                    {toolExecution.result !== null && (
                       <div>
                         <p className="text-sm font-medium mb-2">실행 결과:</p>
                         <div className="bg-background p-3 rounded border">
@@ -1032,30 +1033,30 @@ export default function MCPServersPage() {
                       {serverDetails.tools.length === 0 ? (
                         <p className="text-sm text-muted-foreground">사용 가능한 도구가 없습니다</p>
                       ) : (
-                        serverDetails.tools.map((tool: any, index: number) => (
+                        serverDetails.tools.map((tool: unknown, index: number) => (
                           <div key={index} className="p-3 border rounded-lg">
                             <div className="flex items-center justify-between mb-2">
-                              <div className="font-medium text-sm">{tool.name}</div>
+                              <div className="font-medium text-sm">{(tool as { name: string }).name}</div>
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleExecuteTool(tool.name)}
+                                onClick={() => handleExecuteTool((tool as { name: string }).name)}
                                 disabled={toolExecution.loading}
                                 className="text-xs"
                               >
-                                {toolExecution.loading && toolExecution.toolName === tool.name ? '실행 중...' : '실행'}
+                                {toolExecution.loading && toolExecution.toolName === (tool as { name: string }).name ? '실행 중...' : '실행'}
                               </Button>
                             </div>
-                            {tool.description && (
+                            {(tool as { description?: string }).description && (
                               <p className="text-xs text-muted-foreground mt-1">
-                                {tool.description}
+                                {(tool as { description: string }).description}
                               </p>
                             )}
-                            {tool.inputSchema && (
+                            {(tool as { inputSchema?: unknown }).inputSchema !== undefined && (
                               <div className="mt-2">
                                 <p className="text-xs font-medium">입력 스키마:</p>
                                 <code className="text-xs bg-muted px-2 py-1 rounded block mt-1">
-                                  {JSON.stringify(tool.inputSchema, null, 2)}
+                                  {JSON.stringify((tool as { inputSchema: unknown }).inputSchema, null, 2)}
                                 </code>
                               </div>
                             )}
@@ -1075,24 +1076,24 @@ export default function MCPServersPage() {
                       {serverDetails.resources.length === 0 ? (
                         <p className="text-sm text-muted-foreground">사용 가능한 리소스가 없습니다</p>
                       ) : (
-                        serverDetails.resources.map((resource: any, index: number) => (
+                        serverDetails.resources.map((resource: unknown, index: number) => (
                           <div key={index} className="p-3 border rounded-lg">
-                            <div className="font-medium text-sm">{resource.name}</div>
-                            {resource.description && (
+                            <div className="font-medium text-sm">{(resource as { name: string }).name}</div>
+                            {(resource as { description?: string }).description && (
                               <p className="text-xs text-muted-foreground mt-1">
-                                {resource.description}
+                                {(resource as { description: string }).description}
                               </p>
                             )}
                             <div className="mt-2">
                               <p className="text-xs font-medium">URI:</p>
                               <code className="text-xs bg-muted px-2 py-1 rounded block mt-1">
-                                {resource.uri}
+                                {(resource as { uri: string }).uri}
                               </code>
                             </div>
-                            {resource.mimeType && (
+                            {(resource as { mimeType?: string }).mimeType && (
                               <div className="mt-1">
                                 <Badge variant="outline" className="text-xs">
-                                  {resource.mimeType}
+                                  {(resource as { mimeType: string }).mimeType}
                                 </Badge>
                               </div>
                             )}
@@ -1112,24 +1113,24 @@ export default function MCPServersPage() {
                       {serverDetails.prompts.length === 0 ? (
                         <p className="text-sm text-muted-foreground">사용 가능한 프롬프트가 없습니다</p>
                       ) : (
-                        serverDetails.prompts.map((prompt: any, index: number) => (
+                        serverDetails.prompts.map((prompt: unknown, index: number) => (
                           <div key={index} className="p-3 border rounded-lg">
-                            <div className="font-medium text-sm">{prompt.name}</div>
-                            {prompt.description && (
+                            <div className="font-medium text-sm">{(prompt as { name: string }).name}</div>
+                            {(prompt as { description?: string }).description && (
                               <p className="text-xs text-muted-foreground mt-1">
-                                {prompt.description}
+                                {(prompt as { description: string }).description}
                               </p>
                             )}
-                            {prompt.arguments && prompt.arguments.length > 0 && (
+                            {(prompt as { arguments?: unknown[] }).arguments && (prompt as { arguments: unknown[] }).arguments.length > 0 && (
                               <div className="mt-2">
                                 <p className="text-xs font-medium">인수:</p>
                                 <div className="space-y-1 mt-1">
-                                  {prompt.arguments.map((arg: any, argIndex: number) => (
+                                  {(prompt as { arguments: unknown[] }).arguments.map((arg: unknown, argIndex: number) => (
                                     <div key={argIndex} className="text-xs">
-                                      <span className="font-medium">{arg.name}</span>
-                                      {arg.description && (
+                                      <span className="font-medium">{(arg as { name: string }).name}</span>
+                                      {(arg as { description?: string }).description && (
                                         <span className="text-muted-foreground ml-1">
-                                          - {arg.description}
+                                          - {(arg as { description: string }).description}
                                         </span>
                                       )}
                                     </div>
