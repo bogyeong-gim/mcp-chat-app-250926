@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Settings, Bot, User, X, RotateCcw, Paperclip, File } from "lucide-react";
+import { Send, Settings, Bot, User, X, RotateCcw, Paperclip, File, Server } from "lucide-react";
 import MarkdownRenderer from "../components/MarkdownRenderer";
 import FileUpload from "../components/FileUpload";
 import { Button } from "../components/ui/button";
@@ -305,6 +305,15 @@ export default function ChatPage() {
                   대화 초기화
                 </Button>
               )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2"
+                onClick={() => window.location.href = '/mcp-servers'}
+              >
+                <Server className="w-4 h-4" />
+                MCP 서버
+              </Button>
               <Button variant="outline" size="sm" className="flex items-center gap-2">
                 <Settings className="w-4 h-4" />
                 설정
